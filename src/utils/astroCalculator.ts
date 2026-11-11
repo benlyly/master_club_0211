@@ -68,7 +68,7 @@ function westernZodiac(month: number, day: number): { sign: string; element: Wes
 }
 
 function chineseAnimal(year: number): ChineseAnimal {
-  const index = ((year - 4) % 12 + 12) % 12
+  const index = ((year % 12) + 12) % 12
   return ANIMALS[index]
 }
 

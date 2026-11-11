@@ -11,7 +11,7 @@ export interface BrandLetter {
 const LETTERS = ['M', 'A', 'S', 'T', 'E', 'R'] as const
 
 const WHITE_COLOR = '#ffffff'
-const CHARCOAL_COLOR = '#1a1a1a'
+const CHARCOAL_COLOR = '#070708'
 const EMBoss_SHADOW = '0 1px 0 rgba(255,255,255,0.35), 0 -1px 1px rgba(255,255,255,0.12)'
 
 const GOLD_GRADIENT = 'linear-gradient(180deg, #f0c75e 0%, #d9a843 45%, #b8860b 70%, #f4d97a 100%)'

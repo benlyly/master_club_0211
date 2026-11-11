@@ -8,7 +8,6 @@ const TEA_CLIP = 'polygon(100% 0, 100% 100%, 0 50%)'
 const COFFEE_CLIP = 'polygon(0 0, 100% 50%, 0 100%)'
 const SPRING_STEP = 1 / 240
 const LEAD_FACTOR = 1.34
-const TRAIL_FACTOR = 0.48
 const SURFACE_LEVEL = 0.42
 const BUBBLES = 6
 
@@ -30,10 +29,10 @@ interface LiquidPalette {
 
 const TEA: LiquidPalette = {
   stops: [
-    [0, 'rgba(180,220,120,0.14)'],
-    [0.3, 'rgba(140,195,90,0.20)'],
-    [0.7, 'rgba(100,165,55,0.26)'],
-    [1, 'rgba(60,120,30,0.30)'],
+    [0, 'rgba(180,220,120,0.12)'],
+    [0.3, 'rgba(140,195,90,0.24)'],
+    [0.7, 'rgba(100,165,55,0.45)'],
+    [1, 'rgba(60,120,30,0.65)'],
   ],
   meniscus: 'rgba(220,245,180,0.95)',
   meniscusGlow: 'rgba(160,220,100,0.85)',
@@ -44,10 +43,10 @@ const TEA: LiquidPalette = {
 
 const COFFEE: LiquidPalette = {
   stops: [
-    [0, 'rgba(220,170,100,0.14)'],
-    [0.3, 'rgba(180,130,60,0.20)'],
-    [0.7, 'rgba(130,85,35,0.26)'],
-    [1, 'rgba(85,45,15,0.30)'],
+    [0, 'rgba(220,170,100,0.12)'],
+    [0.3, 'rgba(180,130,60,0.24)'],
+    [0.7, 'rgba(130,85,35,0.45)'],
+    [1, 'rgba(85,45,15,0.65)'],
   ],
   meniscus: 'rgba(255,225,185,0.95)',
   meniscusGlow: 'rgba(230,165,90,0.85)',
@@ -407,7 +406,7 @@ export function SplitDiamond() {
 
     const triggerImpact = (velocity: number) => {
       const s = physics.current
-      const strength = clamp(Math.abs(velocity) / 1500, 0.25, 1.6)
+      const strength = clamp(Math.abs(velocity) / 4000, 0.25, 1.6)
       runtime.tea.surface.triggerImpact('right', strength)
       runtime.coffee.surface.triggerImpact('left', strength)
       s.recoil = strength
@@ -421,12 +420,13 @@ export function SplitDiamond() {
       last = now
       s.time += dt
 
-      const stiffness = s.dragging ? 320 : 620
-      const damping = s.dragging ? 28 : 16
+      const stiffness = s.dragging ? 320 : 2200
+      const damping = s.dragging ? 28 : 42
       springAccumulator += dt
       while (springAccumulator >= SPRING_STEP) {
         const prevX = s.x
-        const accel = -stiffness * (s.x - s.targetX) - damping * s.v
+        const magneticBoost = 1 + Math.exp(-Math.abs(s.x) / 25) * 1.8
+        const accel = -stiffness * magneticBoost * (s.x - s.targetX) - damping * s.v
         s.v += accel * SPRING_STEP
         s.x += s.v * SPRING_STEP
 
@@ -445,17 +445,19 @@ export function SplitDiamond() {
       s.prevV = s.v
 
       const x = s.x
-      const teaFactor = x < 0 ? LEAD_FACTOR : TRAIL_FACTOR
-      const coffeeFactor = x > 0 ? LEAD_FACTOR : TRAIL_FACTOR
-      const teaRotation = clamp(s.v * 0.0011 * teaFactor * 10, -14, 14)
-      const coffeeRotation = clamp(-s.v * 0.0011 * coffeeFactor * 10, -14, 14)
+      const teaActive = x < 0
+      const coffeeActive = x > 0
+      const teaFactor = teaActive ? LEAD_FACTOR : 0
+      const coffeeFactor = coffeeActive ? LEAD_FACTOR : 0
+      const teaRotation = teaActive ? clamp(s.v * 0.011, -14, 14) : 0
+      const coffeeRotation = coffeeActive ? clamp(-s.v * 0.011, -14, 14) : 0
       const lift = Math.abs(x) * 0.04
 
       if (runtime.tea.el) {
-        runtime.tea.el.style.transform = `translate3d(${(x * teaFactor).toFixed(2)}px, ${(-lift * teaFactor).toFixed(2)}px, 0) rotate(${teaRotation.toFixed(2)}deg)`
+        runtime.tea.el.style.transform = `translate3d(${(x * teaFactor).toFixed(2)}px, ${(-(teaActive ? lift : 0)).toFixed(2)}px, 0) rotate(${teaRotation.toFixed(2)}deg)`
       }
       if (runtime.coffee.el) {
-        runtime.coffee.el.style.transform = `translate3d(${(x * coffeeFactor).toFixed(2)}px, ${(lift * coffeeFactor).toFixed(2)}px, 0) rotate(${coffeeRotation.toFixed(2)}deg)`
+        runtime.coffee.el.style.transform = `translate3d(${(x * coffeeFactor).toFixed(2)}px, ${(coffeeActive ? lift : 0).toFixed(2)}px, 0) rotate(${coffeeRotation.toFixed(2)}deg)`
       }
 
       s.recoil *= Math.exp(-dt * 7)

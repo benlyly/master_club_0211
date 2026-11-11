@@ -15,8 +15,8 @@ const ROMAN_MAP: ReadonlyArray<readonly [number, string]> = [
 ]
 
 export function toRoman(num: number): string {
-  let n = Math.max(0, Math.floor(num))
-  if (n === 0) return 'N'
+  if (num <= 0) return ''
+  let n = Math.floor(num)
   let result = ''
   for (const [value, symbol] of ROMAN_MAP) {
     while (n >= value) {

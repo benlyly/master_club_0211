@@ -4,9 +4,9 @@ export const IMPACT_DURATION = 1.5
 export type Edge = 'left' | 'right'
 
 const FIXED_STEP = 1 / 120
-const TENSION = 70
-const BASE_DAMPING = 2.4
-const IMPACT_DAMPING = 0.7
+const TENSION = 50
+const BASE_DAMPING = 1.6
+const IMPACT_DAMPING = 0.5
 const WAVE_SPEED_SQ = 8200
 
 export class FluidSurface {
